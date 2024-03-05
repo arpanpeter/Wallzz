@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -16,14 +15,15 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.example.wallz.R;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class fullImageActivity extends AppCompatActivity {
@@ -49,15 +49,15 @@ public class fullImageActivity extends AppCompatActivity {
             }
         });
         save.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
-                Toast.makeText(fullImageActivity.this, "SAVED", Toast.LENGTH_SHORT).show();
+                saveImageToDevice();
             }
         });
     }
 
     private void loadImage(String image_url) {
-
         Glide.with(this)
                 .load(image_url)
                 .listener(new RequestListener<Drawable>() {
@@ -74,7 +74,6 @@ public class fullImageActivity extends AppCompatActivity {
                     }
                 })
                 .into(fullImage);
-
     }
 
     private void setHomeScreen() {
@@ -83,6 +82,26 @@ public class fullImageActivity extends AppCompatActivity {
         try {
             wallpaperManager.setBitmap(bitmap);
             Toast.makeText(getApplicationContext(), "Wallpaper Set", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveImageToDevice() {
+        BitmapDrawable drawable = (BitmapDrawable) fullImage.getDrawable();
+        Bitmap bitmap = drawable.getBitmap();
+
+        File directory = new File(Environment.getExternalStorageDirectory().getPath() + "/Wallpapers");
+        directory.mkdirs(); // Create if not exists
+
+        File file = new File(directory, "wallpaper_" + System.currentTimeMillis() + ".jpg");
+
+        try {
+            FileOutputStream outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+            Toast.makeText(getApplicationContext(), "Image Saved", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
         }

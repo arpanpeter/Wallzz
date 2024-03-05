@@ -13,7 +13,7 @@
         android:layout_centerInParent="true"
         android:adjustViewBounds="true"
         android:foregroundGravity="center"
-        android:scaleType="fitXY"
+        android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
