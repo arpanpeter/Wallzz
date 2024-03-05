@@ -30,8 +30,7 @@ public class fullImageActivity extends AppCompatActivity {
     ImageView fullImage;
     ProgressBar progressBar;
     Button save, setBack;
-    String image_url, dirPath, fileName;
-    File file;
+    String image_url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
