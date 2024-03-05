@@ -1,9 +1,7 @@
 package com.example.wallz;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Window;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -66,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     }
 @Override
     public void onItemClick(int position) {
-        Intent intent = new Intent(getApplicationContext(), fullImageActivity.class);
+        Intent intent = new Intent(getApplicationContext(), FullImageActivity.class);
         intent.putExtra("imageUrl", dataList.get(position).getSrc().getLarge());
         startActivity(intent);
 
