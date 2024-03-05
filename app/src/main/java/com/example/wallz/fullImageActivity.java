@@ -93,6 +93,7 @@ public class fullImageActivity extends AppCompatActivity {
 
         File directory = new File(Environment.getExternalStorageDirectory().getPath() + "/Wallpapers");
         directory.mkdirs(); // Create if not exists
+        // Create if not exists
 
         File file = new File(directory, "wallpaper_" + System.currentTimeMillis() + ".jpg");
 

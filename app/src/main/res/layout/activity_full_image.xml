@@ -39,6 +39,7 @@
         android:background="@color/cardview_dark_background"
         android:padding="12dp"
         android:text="Save"
+
         android:textColor="#FA0707"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
