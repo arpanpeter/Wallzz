@@ -1,12 +1,17 @@
 package com.example.wallz;
 
+import android.Manifest;
 import android.app.WallpaperManager;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -28,6 +33,7 @@ import com.bumptech.glide.request.target.Target;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 public class FullImageActivity extends AppCompatActivity {
     ImageView fullImage;
@@ -98,9 +104,9 @@ public class FullImageActivity extends AppCompatActivity {
     }
 
     private void checkStoragePermissionAndSave() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
         } else {
             saveImageToDevice();
@@ -123,27 +129,41 @@ public class FullImageActivity extends AppCompatActivity {
         BitmapDrawable drawable = (BitmapDrawable) fullImage.getDrawable();
         Bitmap bitmap = drawable.getBitmap();
 
-        // Create directory if it doesn't exist
-        File directory = new File(Environment.getExternalStorageDirectory() + File.separator + "Wallpapers");
-        if (!directory.exists()) {
-            directory.mkdirs();
+        ContentResolver resolver = getContentResolver();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "wallpaper_" + System.currentTimeMillis() + ".jpg");
+        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
+
+
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + File.separator + "Wallpapers");
         }
 
-        // Generate file name
-        String fileName = "wallpaper_" + System.currentTimeMillis() + ".jpg";
-
-        // Create file
-        File file = new File(directory, fileName);
-
+        OutputStream outputStream = null;
         try {
-            FileOutputStream outputStream = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-            outputStream.flush();
-            outputStream.close();
-            Toast.makeText(this, "Image saved successfully", Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
+            // Inserting the image into the MediaStore and getting the content URI
+            final Uri contentUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+            if (contentUri != null) {
+                outputStream = resolver.openOutputStream(contentUri);
+                if (outputStream != null) {
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                    outputStream.close();
+                    Toast.makeText(this, "Image saved successfully", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+        } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
+        } finally {
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
+        Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
     }
 }
